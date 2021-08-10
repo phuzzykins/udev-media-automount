@@ -30,6 +30,8 @@ else
     dev=/dev/${1##*/}  
 fi
 
+find /home/pi/gcode_files/ -xtype l -delete
+
 # Check if the device exists, if not but mounted, umount it
 if ! [ -b $dev ]
 then
@@ -54,6 +56,7 @@ then
     do
         [ -d "$dir" ] && ! mountpoint -q "$dir" && rmdir "$dir"
     done
+    find /home/pi/gcode_files/ -xtype l -delete
     exit $exitcode
 fi
 
@@ -99,6 +102,7 @@ then
     username="$(ps au | awk '$11 ~ /^xinit/ { print $1; exit }')"
     [[ "$username" ]] && DISPLAY=:0 runuser -u "$username" xdg-open "$AUTOMOUNT_DIR"
     log "Device successfully mounted: $AUTOMOUNT_DIR"
+    ln -s "$AUTOMOUNT_DIR" "/home/pi/gcode_files/${LABEL:-${dev##*/}}"
     exit 0
 else
     log "Mount error: $?"
